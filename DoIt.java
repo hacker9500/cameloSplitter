@@ -7,6 +7,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
+
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.Channel;
 
 public class DoIt {
 
@@ -14,7 +19,11 @@ public class DoIt {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		new Splitter();
+		try{
+			new Splitter();
+		}catch (Exception ex){
+			System.out.println("failed to initialie list");
+		}
 	}
 }
 
@@ -78,7 +87,7 @@ class Splitter{
 		//tagName = spl[spl.length - 1];
 	}
 	
-	public Splitter(){
+	public Splitter() throws IOException, TimeoutException{
 		list = new CustomList<>();
 		getParams();
 		analyzeTag();
@@ -232,7 +241,7 @@ class Splitter{
 	
 	public void fetching(){
 		try{
-			File fl = new File("C:/Users/Aman.Gaur/Desktop/zips1123.xml");
+			File fl = new File("C:/Users/Aman.Gaur/Desktop/zips12.xml");
 			bin = new BufferedInputStream(new FileInputStream(fl));
 			byte content[] = new byte[1024];
 			int bytesRead=0;
@@ -270,22 +279,23 @@ class Splitter{
 		int fileCounter = 1;
 		
 		ConnectionFactory factory;
-	    Connection connection = factory.newConnection();
+	    Connection connection;
 	    Channel channel;
 		
-	    CustomList(){
+	    CustomList() throws IOException, TimeoutException{
 	    	factory = new ConnectionFactory();
-		    factory.setHost("localhost");
+		    factory.setHost("172.17.185.170");
+		    connection =  factory.newConnection();
 		    channel = connection.createChannel();
 	    }
 	    
-		public void writeFile(){
-			channel.queueDeclare("temp", false, false, false, null);
+		public void writeFile() throws IOException{
+			channel.queueDeclare("temp112323", false, false, false, null);
 		    String message = "";
 		    for(String i: list){
 		    	message += i;
 		    }
-		    channel.basicPublish("", "temp", null, message.getBytes());
+		    channel.basicPublish("", "temp112323", null, message.getBytes());
 		    System.out.println(" [x] Sent '" + message + "'");
 			// write data to file
 			//String fileN = fileName+String.valueOf(fileCounter)+".xml";
@@ -301,7 +311,12 @@ class Splitter{
 		public boolean add(T e) {
 			// TODO Auto-generated method stub
 			if(count >= qtySplit){
-				writeFile();
+				try{
+					writeFile();
+				}
+				catch(Exception ex){
+					System.out.println("unable to connect to rabbitmq");
+				}
 				count=1;
 				return super.add(e);
 			}
