@@ -36,7 +36,10 @@ class Splitter{
 	int skipLevel = -1;
 	int flagLevel = -1;
 	
+	
+	
 	BufferedInputStream bin = null;
+	
 	
 	CustomList<String> list;
 	String currentTag = "";
@@ -229,7 +232,7 @@ class Splitter{
 	
 	public void fetching(){
 		try{
-			File fl = new File("C:/Users/Aman.Gaur/Desktop/zips12.xml");
+			File fl = new File("C:/Users/Aman.Gaur/Desktop/zips1123.xml");
 			bin = new BufferedInputStream(new FileInputStream(fl));
 			byte content[] = new byte[1024];
 			int bytesRead=0;
@@ -246,7 +249,7 @@ class Splitter{
             	//System.out.println("fft");
             	//temp = strFileContents;
             }
-            //System.out.println(temp);
+            System.out.println("done");
             for(String ft: list)
             	System.out.println(ft);
 //            for(String str: list){
@@ -266,15 +269,33 @@ class Splitter{
 		String fileName = "test";
 		int fileCounter = 1;
 		
+		ConnectionFactory factory;
+	    Connection connection = factory.newConnection();
+	    Channel channel;
+		
+	    CustomList(){
+	    	factory = new ConnectionFactory();
+		    factory.setHost("localhost");
+		    channel = connection.createChannel();
+	    }
+	    
 		public void writeFile(){
+			channel.queueDeclare("temp", false, false, false, null);
+		    String message = "";
+		    for(String i: list){
+		    	message += i;
+		    }
+		    channel.basicPublish("", "temp", null, message.getBytes());
+		    System.out.println(" [x] Sent '" + message + "'");
 			// write data to file
-			String fileN = fileName+String.valueOf(fileCounter)+".xml";
+			//String fileN = fileName+String.valueOf(fileCounter)+".xml";
 			// start temp content
-			System.out.println(super.size());
+			//System.out.println(super.size());
 			super.clear();
 			//end
+			
 			fileCounter++;
-		} 
+		}
 
 		@Override
 		public boolean add(T e) {
